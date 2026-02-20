@@ -187,3 +187,46 @@ h2,h3{
   font-size: 1em;
 }
 
+.footer{
+  background-color: #eab9b9;
+   position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
+  box-sizing: border-box;
+  justify-content: space-evenly;
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 50px;
+  height: 25rem;
+}
+
+.f-div{
+  text-decoration: none;
+  display: flex;
+  justify-content: space-evenly;
+  flex-direction: column;
+}
+
+.f-link{
+  text-decoration: none;
+  color:rgb(92, 91, 91);
+}
+
+.f-link:hover{
+  text-decoration: underline;
+  color: black;
+}
+
+#chat{
+  color: rgb(198, 117, 130);
+  font-size: 4rem;
+  position: fixed;
+  z-index: 9999;
+  bottom: 30px;
+  right: 30px;
+}
