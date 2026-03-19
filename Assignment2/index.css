@@ -1,7 +1,9 @@
 body{
   padding: 0;
   font-family:  'Inter', sans-serif;
-  margin: 0%;
+  margin-left: 10%;
+  margin-right: 10%;
+  margin-top: 0%;
 }
 
 #free-shipping {
@@ -9,8 +11,14 @@ body{
   font-size: 17px;
   text-align: center;
   padding: 17px;
-  margin: 0;
-  width: 100%;
+  margin-top: 0;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
+  box-sizing: border-box;
 
 }
 
@@ -22,7 +30,6 @@ body{
   margin-top: 0.5%;
   width: 80%;
   font-size: 16.5px;
-  margin-left: 10.5%;
 }
 
 .nav-links{
@@ -50,18 +57,13 @@ body{
 .video{
   display: flex;
   justify-content: center;
-
-}
-
-#h1{
-  margin-bottom: 1.7%;
+  
 }
 
 .images-div{
   display: flex;
   flex-wrap: wrap;
   justify-content: space-evenly;
-  margin-left: 10%;
 }
 
 .images{
@@ -80,7 +82,7 @@ h1{
   color: darkslategray;
   font-weight: 900;
   font-size: 1.5em;
-  margin-left: 10%;
+  margin-bottom: 2%;
 }
 
 .img:hover{
@@ -99,8 +101,6 @@ h1{
 p{
   font-size: 1em;
   color: rgb(92, 91, 91);
-  margin-left: 10%;
-  margin-bottom: 2%;
 }
 
 .prev-price{
@@ -115,9 +115,6 @@ p{
   display: flex;
   justify-content: space-evenly;
   margin-top: 3%;
-}
-#c h1{
-  margin-left: 0%;
 }
 
 #care-img{
@@ -152,12 +149,6 @@ p{
   flex-wrap: wrap;
   justify-content: center;
   gap: 2%;
-  margin-right: 5%;
-  margin-left: 5%;
-}
-#fb{
-  margin-left: 0%;
-  margin-bottom: 0.5%;
 }
 
 .div{
@@ -173,15 +164,14 @@ p{
 .sign-up{
   background-color: #f2f2f2;
   text-align: center;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
   box-sizing: border-box;
   padding: 3%;
-}
-.sign-up p{
-  margin-left: 0%;
-}
-.sign-up h1{
-  margin-left: 0%;
-  margin-right: 3%;
 }
 #input{
   height: 3em;
@@ -190,18 +180,21 @@ p{
   border: 2px solid black;
 } 
 input::placeholder{
-  font-size: 17px;
-  margin-right: 1.5%;
-
+  font-size: 20px;
 }
 
 h2,h3{
   font-size: 1em;
-  margin-bottom: 1%;
 }
 
 .footer{
   background-color: #eab9b9;
+   position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
   box-sizing: border-box;
   justify-content: space-evenly;
   align-items: center;
