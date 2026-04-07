@@ -19,7 +19,7 @@ $(document).ready(function () {
         const card = `
           <div class="images">
             <img src="${product.image}" class="img">
-            <h2>${product.title.substring(0, 20)}...</h2>
+            <h2>${product.title.substring(0, 20)}${product.title.length > 20 ? "..." : ""}</h2>
             <h3 class="sale-price">$${product.price}</h3>
             <button class="quick-btn" 
               data-title="${product.title}"
