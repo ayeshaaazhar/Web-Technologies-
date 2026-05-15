@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – Adore Heaven</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/index.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+
+  <div>
+    <p id="free-shipping">FREE SHIPPING ON ORDERS ABOVE RS. 3,500</p>
+  </div>
+
+  <div id="nav">
+    <span class="material-symbols-outlined" id="hamburger">menu</span>
+    <a href="/"><img src="/Assests/logo.jpeg" alt="logo"></a>
+    <nav>
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="/"         class="nav-links">Home</a></li>
+        <li><a href="/products" class="nav-links">Shop All</a></li>
+        <li><a href="#"         class="nav-links">Earrings</a></li>
+        <li><a href="#"         class="nav-links">Necklaces</a></li>
+        <li><a href="#"         class="nav-links">Rings</a></li>
+        <li><a href="#"         class="nav-links">Bracelets</a></li>
+      </ul>
+    </nav>
+    <div class="nav-auth-links">
+      <% if (currentUser) { %>
+        <span class="nav-username">Hi, <%= currentUser.name.split(' ')[0] %></span>
+        <a href="/logout" class="nav-auth-btn">Logout</a>
+      <% } else { %>
+        <a href="/login"    class="nav-auth-btn active">Login</a>
+        <a href="/register" class="nav-auth-btn">Register</a>
+      <% } %>
+    </div>
+    <a href="#" class="icon"><span class="material-symbols-outlined">search</span></a>
+    <a href="#" class="icon"><span class="material-symbols-outlined">shopping_bag</span></a>
+  </div>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <div class="auth-brand">💎</div>
+      <h1 class="auth-title">Welcome Back</h1>
+      <p class="auth-sub">Sign in to your Adore Heaven account</p>
+
+      <% if (messages.error && messages.error.length > 0) { %>
+        <div class="flash flash-error">
+          <span class="material-symbols-outlined">error</span>
+          <%= messages.error[0] %>
+        </div>
+      <% } %>
+      <% if (messages.success && messages.success.length > 0) { %>
+        <div class="flash flash-success">
+          <span class="material-symbols-outlined">check_circle</span>
+          <%= messages.success[0] %>
+        </div>
+      <% } %>
+
+      <form action="/login" method="POST" class="auth-form">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" class="auth-input"
+            placeholder="you@example.com" value="<%= formData.email || '' %>" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="password" name="password" class="auth-input"
+              placeholder="Your password" required>
+            <button type="button" class="toggle-pw" onclick="togglePassword('password', this)">
+              <span class="material-symbols-outlined">visibility</span>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="auth-btn">Sign In</button>
+      </form>
+
+      <p class="auth-switch">Don't have an account? <a href="/register">Register</a></p>
+    </div>
+  </main>
+
+  <script src="/js/index.js"></script>
+  <script>
+    function togglePassword(id, btn) {
+      const input = document.getElementById(id);
+      const icon  = btn.querySelector('.material-symbols-outlined');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = 'visibility_off';
+      } else {
+        input.type = 'password';
+        icon.textContent = 'visibility';
+      }
+    }
+  </script>
+</body>
+</html>
