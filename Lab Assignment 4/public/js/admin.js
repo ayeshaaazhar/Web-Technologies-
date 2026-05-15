@@ -1,5 +1,3 @@
-// admin.js
-
 // Delete confirmation modal 
 function confirmDelete(id, name) {
   document.getElementById("modal-product-name").textContent = name;

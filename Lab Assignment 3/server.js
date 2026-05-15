@@ -13,7 +13,7 @@ const { isLoggedIn, isAdmin } = require("./middleware/auth");
 
 const app = express();
 
-// ── DB ──
+//  DB 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/adoreheaven";
 mongoose.connect(MONGO_URI)
   .then(() => console.log(" MongoDB connected"))
@@ -32,7 +32,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── Sessions ──
+//  Sessions 
 app.use(session({
   secret: process.env.SESSION_SECRET || "adoreheaven-secret-key-change-in-prod",
   resave: false,
@@ -44,7 +44,7 @@ app.use(session({
 // ── Flash ──
 app.use(flash());
 
-// ── Global locals (currentUser + flash msgs in every template) ──
+//  Global locals (currentUser + flash msgs in every template) 
 app.use(async (req, res, next) => {
   res.locals.currentUser = null;
   if (req.session.userId) {
@@ -60,7 +60,7 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// ── Multer ──
+//  Multer 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, path.join(__dirname, "public/uploads")),
   filename:    (req, file, cb) => {
@@ -77,10 +77,8 @@ const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024
 const uploadsDir = path.join(__dirname, "public/uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
-
-// ════════════════════════════════════════════
 //   AUTH ROUTES
-// ════════════════════════════════════════════
+
 
 app.get("/register", (req, res) => {
   if (req.session.userId) return res.redirect("/");
@@ -154,9 +152,8 @@ app.get("/logout", (req, res) => {
 });
 
 
-// ════════════════════════════════════════════
 //   PUBLIC ROUTES
-// ════════════════════════════════════════════
+
 
 app.get("/", (req, res) => {
   res.render("index");
@@ -201,15 +198,14 @@ app.get("/products", async (req, res) => {
   }
 });
 
-// Checkout — must be logged in
+// Checkout (must be logged in)
 app.get("/checkout", isLoggedIn, (req, res) => {
   res.send("Checkout page — coming soon!");
 });
 
 
-// ════════════════════════════════════════════
 //   ADMIN ROUTES  (isAdmin middleware on every route)
-// ════════════════════════════════════════════
+
 
 app.get("/admin", isAdmin, async (req, res) => {
   try {

@@ -6,20 +6,20 @@ const Product  = require("./models/Product");
 
 const app = express();
 
-// ── DB ──
+//  DB 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/adoreheaven";
 mongoose.connect(MONGO_URI)
   .then(() => console.log(" MongoDB connected"))
   .catch(err => console.error(" MongoDB error:", err));
 
-// ── Config ──
+//  Config 
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// ── Method override (for PUT/DELETE from HTML forms) ──
-// Only reads from query string — body may not be parsed yet at middleware time
+//  Method override (for PUT/DELETE from HTML forms) 
+// Only reads from query string , body may not be parsed yet at middleware time
 app.use((req, res, next) => {
   const method = (req.query._method || "").toUpperCase();
   if (method === "PUT" || method === "DELETE") {
@@ -28,7 +28,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── Multer: image upload ──
+//  Multer: image upload 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.join(__dirname, "public/uploads"));
@@ -114,10 +114,8 @@ app.get("/products", async (req, res) => {
   }
 });
 
-
-// ════════════════════════════════════════════
 //   ADMIN ROUTES
-// ════════════════════════════════════════════
+
 
 // Dashboard
 app.get("/admin", async (req, res) => {
@@ -267,5 +265,5 @@ app.delete("/admin/products/:id", async (req, res) => {
 });
 
 
-// ── Start ──
+//  Start 
 app.listen(3000, () => console.log("Server running on http://localhost:3000"));

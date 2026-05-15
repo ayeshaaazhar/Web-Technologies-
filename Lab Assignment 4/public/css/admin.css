@@ -1,4 +1,3 @@
-/* admin.css */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -74,7 +73,7 @@ body.admin-body {
 .nav-item.active { background: var(--pink-dark); color: #fff; }
 .nav-item .material-symbols-outlined { font-size: 1.1rem; }
 
-/* ── Main Area ── */
+/*  Main Area  */
 .admin-main {
   flex: 1;
   min-width: 0;
@@ -98,7 +97,7 @@ body.admin-body {
   font-weight: 700;
 }
 
-/* ── Buttons ── */
+/*  Buttons */
 .btn-primary {
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--pink-dark); color: #fff;
@@ -146,7 +145,7 @@ body.admin-body {
 .btn-icon.delete:hover { background: #fccfcd; }
 .btn-icon .material-symbols-outlined { font-size: 1rem; }
 
-/* ── Stats Grid ── */
+/* Stats Grid  */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -163,7 +162,7 @@ body.admin-body {
 .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--rose-text); line-height: 1; }
 .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 4px; font-weight: 500; }
 
-/* ── Alerts ── */
+/*  Alerts  */
 .alert {
   display: flex; align-items: center; gap: 10px;
   padding: 13px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 500;
@@ -171,7 +170,7 @@ body.admin-body {
 .alert-success { background: #e8f5ee; color: #2e7d52; border: 1px solid #a8d5bc; }
 .alert-error   { background: #fdecea; color: #c62828; border: 1px solid #f5bcbc; }
 
-/* ── Table Controls ── */
+/*  Table Controls  */
 .table-controls { display: flex; align-items: center; gap: 0; }
 .search-form { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; width: 100%; }
 
@@ -190,7 +189,7 @@ body.admin-body {
   background: var(--white); outline: none; cursor: pointer;
 }
 
-/* ── Table ── */
+/*  Table  */
 .table-wrapper {
   background: var(--white);
   border: 1px solid var(--border);
@@ -241,7 +240,7 @@ body.admin-body {
 
 .empty-row { text-align: center; color: var(--muted); padding: 48px 0 !important; font-style: italic; }
 
-/* ── Pagination ── */
+/* Pagination  */
 .pagination { display: flex; justify-content: center; gap: 6px; }
 .page-btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -254,7 +253,7 @@ body.admin-body {
 .page-btn.active { background: var(--pink-dark); border-color: var(--pink-dark); color: #fff; font-weight: 600; pointer-events: none; }
 .page-btn.disabled { opacity: 0.4; pointer-events: none; }
 
-/* ── Form Card ── */
+/*  Form Card  */
 .form-card {
   background: var(--white);
   border: 1px solid var(--border);
@@ -310,7 +309,7 @@ body.admin-body {
   padding-top: 16px; border-top: 1px solid var(--border);
 }
 
-/* ── Modal ── */
+/* Modal */
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.45);
   display: flex; align-items: center; justify-content: center; z-index: 9999;
@@ -330,7 +329,7 @@ body.admin-body {
 .modal-msg { font-size: 0.88rem; color: var(--muted); line-height: 1.6; margin-bottom: 28px; }
 .modal-actions { display: flex; gap: 12px; justify-content: center; }
 
-/* ── Responsive ── */
+/*  Responsive */
 @media (max-width: 1024px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .admin-main { padding: 24px 20px; }

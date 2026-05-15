@@ -8,11 +8,10 @@ const Order      = require("../models/Order");
 const verifyToken = require("../middleware/verifyToken");
 
 
-// ════════════════════════════════════════════
 //   PUBLIC ENDPOINTS
-// ════════════════════════════════════════════
 
-// ── GET /api/v1/products ──
+
+//  GET /api/v1/products 
 // Returns paginated + filtered product list
 router.get("/products", async (req, res) => {
   try {
@@ -73,7 +72,7 @@ router.get("/products", async (req, res) => {
 });
 
 
-// ── GET /api/v1/products/:id ──
+//  GET /api/v1/products/:id 
 // Returns a single product by ID
 router.get("/products/:id", async (req, res) => {
   try {
@@ -104,11 +103,9 @@ router.get("/products/:id", async (req, res) => {
 });
 
 
-// ════════════════════════════════════════════
 //   AUTH ENDPOINT
-// ════════════════════════════════════════════
 
-// ── POST /api/v1/auth/login ──
+//  POST /api/v1/auth/login 
 // Verifies credentials and returns a JWT token
 router.post("/auth/login", async (req, res) => {
   const { email, password } = req.body;
@@ -161,11 +158,10 @@ router.post("/auth/login", async (req, res) => {
 });
 
 
-// ════════════════════════════════════════════
 //   PROTECTED ENDPOINTS (JWT required)
-// ════════════════════════════════════════════
 
-// ── GET /api/v1/user/profile ──
+
+//  GET /api/v1/user/profile 
 // Returns the authenticated user's profile
 router.get("/user/profile", verifyToken, async (req, res) => {
   try {
@@ -190,7 +186,7 @@ router.get("/user/profile", verifyToken, async (req, res) => {
 });
 
 
-// ── POST /api/v1/orders ──
+//  POST /api/v1/orders 
 // Allows a logged-in user to place an order
 router.post("/orders", verifyToken, async (req, res) => {
   const { items } = req.body;
