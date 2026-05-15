@@ -49,7 +49,7 @@ async function seed() {
   await mongoose.connect(MONGO_URI);
   await Product.deleteMany({});
   await Product.insertMany(products);
-  console.log(`✅ Seeded ${products.length} products`);
+  console.log(` Seeded ${products.length} products`);
   await mongoose.disconnect();
 }
 
