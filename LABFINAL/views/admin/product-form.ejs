@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= isEdit ? 'Edit' : 'Add' %> Product – Adore Heaven Admin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">💎</span>
+      <div>
+        <div class="brand-name">Adore Heaven</div>
+        <div class="brand-sub">Admin Panel</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/admin" class="nav-item">
+        <span class="material-symbols-outlined">dashboard</span> Dashboard
+      </a>
+      <a href="/admin/products/new" class="nav-item active">
+        <span class="material-symbols-outlined">add_circle</span> Add Product
+      </a>
+      <a href="/products" class="nav-item" target="_blank">
+        <span class="material-symbols-outlined">storefront</span> View Store
+      </a>
+      <a href="/" class="nav-item" target="_blank">
+        <span class="material-symbols-outlined">home</span> Home
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="admin-main">
+    <header class="admin-header">
+      <h1 class="admin-title"><%= isEdit ? 'Edit Product' : 'Add New Product' %></h1>
+      <a href="/admin" class="btn-ghost">
+        <span class="material-symbols-outlined">arrow_back</span> Back to Dashboard
+      </a>
+    </header>
+
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+      <div class="alert alert-error">
+        <span class="material-symbols-outlined">error</span>
+        <ul style="margin:0;padding-left:16px;">
+          <% errors.forEach(e => { %><li><%= e %></li><% }) %>
+        </ul>
+      </div>
+    <% } %>
+
+    <div class="form-card">
+      <form
+        action="<%= isEdit ? '/admin/products/' + product._id + '?_method=PUT' : '/admin/products' %>"
+        method="POST"
+        enctype="multipart/form-data"
+        class="product-form"
+        id="product-form"
+        novalidate
+      >
+        <% if (isEdit) { %>
+          <input type="hidden" name="_method" value="PUT">
+        <% } %>
+
+        <div class="form-grid">
+          <!-- Name -->
+          <div class="form-group full-width">
+            <label for="name">Product Name <span class="required">*</span></label>
+            <input type="text" id="name" name="name" class="admin-input"
+              placeholder="e.g. Violet Crescent Necklace"
+              value="<%= isEdit ? product.name : '' %>" required>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label for="category">Category <span class="required">*</span></label>
+            <input type="text" id="category" name="category" class="admin-input"
+              placeholder="e.g. Necklaces"
+              list="category-list"
+              value="<%= isEdit ? product.category : '' %>" required>
+            <datalist id="category-list">
+              <% categories.forEach(cat => { %>
+                <option value="<%= cat %>">
+              <% }) %>
+            </datalist>
+          </div>
+
+          <!-- Price -->
+          <div class="form-group">
+            <label for="price">Sale Price (PKR) <span class="required">*</span></label>
+            <input type="number" id="price" name="price" class="admin-input"
+              placeholder="e.g. 1945" min="0"
+              value="<%= isEdit ? product.price : '' %>" required>
+          </div>
+
+          <!-- Prev Price -->
+          <div class="form-group">
+            <label for="prevPrice">Original Price (PKR) <span class="hint">optional</span></label>
+            <input type="number" id="prevPrice" name="prevPrice" class="admin-input"
+              placeholder="e.g. 3100" min="0"
+              value="<%= isEdit && product.prevPrice ? product.prevPrice : '' %>">
+          </div>
+
+          <!-- Stock -->
+          <div class="form-group">
+            <label for="stock">Stock <span class="required">*</span></label>
+            <input type="number" id="stock" name="stock" class="admin-input"
+              placeholder="e.g. 20" min="0"
+              value="<%= isEdit ? product.stock : '' %>" required>
+          </div>
+
+          <!-- Rating -->
+          <div class="form-group">
+            <label for="rating">Rating (1–5) <span class="required">*</span></label>
+            <select id="rating" name="rating" class="admin-select" required>
+              <% for(let i = 1; i <= 5; i++) { %>
+                <option value="<%= i %>" <%= (isEdit && product.rating === i) || (!isEdit && i === 4) ? 'selected' : '' %>>
+                  <%= '★'.repeat(i) + '☆'.repeat(5-i) %> (<%= i %>)
+                </option>
+              <% } %>
+            </select>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="form-group full-width">
+            <label>Product Image</label>
+            <div class="upload-area" id="upload-area">
+              <% if (isEdit && product.image) { %>
+                <img src="<%= product.image %>" alt="current" class="image-preview" id="image-preview">
+                <p class="upload-hint">Current image — upload a new one to replace it</p>
+              <% } else { %>
+                <img src="" alt="" class="image-preview" id="image-preview" style="display:none;">
+                <div id="upload-placeholder">
+                  <span class="material-symbols-outlined upload-icon">cloud_upload</span>
+                  <p class="upload-hint">Click or drag an image here</p>
+                  <p class="upload-hint small">PNG, JPG, WEBP up to 5MB</p>
+                </div>
+              <% } %>
+              <input type="file" name="image" id="image-input" accept="image/*" class="file-input">
+            </div>
+            <% if (isEdit) { %>
+              <p class="form-hint">Leave empty to keep the current image.</p>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <a href="/admin" class="btn-ghost">Cancel</a>
+          <button type="submit" class="btn-primary">
+            <span class="material-symbols-outlined"><%= isEdit ? 'save' : 'add_circle' %></span>
+            <%= isEdit ? 'Save Changes' : 'Add Product' %>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>

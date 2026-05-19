@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Dashboard – Adore Heaven</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+  <style>
+    .sales-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #6ee7b7;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(1.3); }
+    }
+    .sales-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 36px;
+    }
+    .sales-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 28px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      transition: box-shadow 0.2s;
+    }
+    .sales-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.12); }
+    .sales-card-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    .icon-revenue  { background: #fef3c7; color: #d97706; }
+    .icon-orders   { background: #dbeafe; color: #2563eb; }
+    .icon-avg      { background: #ede9fe; color: #7c3aed; }
+    .icon-product  { background: #dcfce7; color: #16a34a; }
+    .sales-card-body {}
+    .sales-card-value {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #1e293b;
+      line-height: 1.1;
+      transition: color 0.3s;
+    }
+    .sales-card-label {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+    .recent-orders-section {
+      background: #fff;
+      border-radius: 14px;
+      padding: 28px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .last-updated {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: 20px;
+      text-align: right;
+    }
+    .flash-update {
+      animation: flash 0.5s ease;
+    }
+    @keyframes flash {
+      0%   { background: #fef9c3; }
+      100% { background: transparent; }
+    }
+  </style>
+</head>
+<body class="admin-body">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon"><img src="/Assests/logo.jpeg" alt=""></span>
+      <div>
+        <div class="brand-name">Adore Heaven</div>
+        <div class="brand-sub">Admin Panel</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/admin" class="nav-item">
+        <span class="material-symbols-outlined">dashboard</span> Dashboard
+      </a>
+      <a href="/sales" class="nav-item active">
+        <span class="material-symbols-outlined">bar_chart</span> Sales
+      </a>
+      <a href="/admin/products/new" class="nav-item">
+        <span class="material-symbols-outlined">add_circle</span> Add Product
+      </a>
+      <a href="/products" class="nav-item" target="_blank">
+        <span class="material-symbols-outlined">storefront</span> View Store
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="admin-main">
+    <header class="admin-header sales-header">
+      <h1 class="admin-title">Sales Dashboard</h1>
+      <span class="live-badge">
+        <span class="live-dot"></span>
+        LIVE — updates every 10s
+      </span>
+    </header>
+
+    <!-- KPI Cards -->
+    <div class="sales-grid">
+
+      <div class="sales-card">
+        <div class="sales-card-icon icon-revenue">
+          <span class="material-symbols-outlined">payments</span>
+        </div>
+        <div class="sales-card-body">
+          <div class="sales-card-value" id="totalRevenue">
+            Rs. <%= totalRevenue.toLocaleString() %>
+          </div>
+          <div class="sales-card-label">Total Revenue</div>
+        </div>
+      </div>
+
+      <div class="sales-card">
+        <div class="sales-card-icon icon-orders">
+          <span class="material-symbols-outlined">receipt_long</span>
+        </div>
+        <div class="sales-card-body">
+          <div class="sales-card-value" id="totalOrders">
+            <%= totalOrders %>
+          </div>
+          <div class="sales-card-label">Total Orders</div>
+        </div>
+      </div>
+
+      <div class="sales-card">
+        <div class="sales-card-icon icon-avg">
+          <span class="material-symbols-outlined">trending_up</span>
+        </div>
+        <div class="sales-card-body">
+          <div class="sales-card-value" id="avgOrderValue">
+            Rs. <%= avgOrderValue.toLocaleString() %>
+          </div>
+          <div class="sales-card-label">Avg. Order Value</div>
+        </div>
+      </div>
+
+      <div class="sales-card">
+        <div class="sales-card-icon icon-product">
+          <span class="material-symbols-outlined">emoji_events</span>
+        </div>
+        <div class="sales-card-body">
+          <div class="sales-card-value" style="font-size:1.1rem;" id="topProduct">
+            <%= topProduct || 'N/A' %>
+          </div>
+          <div class="sales-card-label">Top-Selling Product</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="recent-orders-section">
+      <div class="section-title">
+        <span class="material-symbols-outlined">list_alt</span>
+        Recent Transactions
+      </div>
+
+      <div class="table-wrapper">
+        <table class="admin-table" id="recentOrdersTable">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Status</th>
+              <th>Amount (PKR)</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="recentOrdersBody">
+            <% if (recentOrders.length === 0) { %>
+              <tr><td colspan="4" class="empty-row">No orders yet.</td></tr>
+            <% } %>
+            <% recentOrders.forEach(order => { %>
+              <tr>
+                <td style="font-family:monospace;font-size:0.78rem;color:#64748b;">
+                  #<%= order._id.toString().slice(-8).toUpperCase() %>
+                </td>
+                <td>
+                  <span class="badge"><%= order.status %></span>
+                </td>
+                <td class="price-cell">Rs. <%= order.totalAmount.toLocaleString() %></td>
+                <td style="font-size:0.82rem;color:#64748b;">
+                  <%= new Date(order.createdAt).toLocaleDateString('en-PK', { day:'numeric', month:'short', year:'numeric' }) %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="last-updated" id="lastUpdated">
+        Last updated: <%= new Date().toLocaleTimeString() %>
+      </div>
+    </div>
+
+  </div><!-- /.admin-main -->
+
+  <!-- jQuery CDN -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <script>
+    // Helper: flash animation on an element
+    function flashElement($el) {
+      $el.addClass('flash-update');
+      setTimeout(() => $el.removeClass('flash-update'), 500);
+    }
+
+    // Poll /api/sales-data every 10 seconds
+    function fetchSalesData() {
+      $.ajax({
+        url: '/api/sales-data',
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          // Update KPI cards
+          var $rev = $('#totalRevenue');
+          var $ord = $('#totalOrders');
+          var $avg = $('#avgOrderValue');
+          var $top = $('#topProduct');
+
+          $rev.text('Rs. ' + data.totalRevenue.toLocaleString());
+          $ord.text(data.totalOrders);
+          $avg.text('Rs. ' + data.avgOrderValue.toLocaleString());
+          $top.text(data.topProduct || 'N/A');
+
+          flashElement($rev);
+          flashElement($ord);
+          flashElement($avg);
+          flashElement($top);
+
+          // Rebuild recent orders table
+          var $tbody = $('#recentOrdersBody');
+          $tbody.empty();
+
+          if (data.recentOrders && data.recentOrders.length > 0) {
+            data.recentOrders.forEach(function(order) {
+              var shortId = '#' + order._id.slice(-8).toUpperCase();
+              var date    = new Date(order.createdAt).toLocaleDateString('en-PK', {
+                day: 'numeric', month: 'short', year: 'numeric'
+              });
+              var row = '<tr>' +
+                '<td style="font-family:monospace;font-size:0.78rem;color:#64748b;">' + shortId + '</td>' +
+                '<td><span class="badge">' + order.status + '</span></td>' +
+                '<td class="price-cell">Rs. ' + order.totalAmount.toLocaleString() + '</td>' +
+                '<td style="font-size:0.82rem;color:#64748b;">' + date + '</td>' +
+                '</tr>';
+              $tbody.append(row);
+            });
+          } else {
+            $tbody.append('<tr><td colspan="4" class="empty-row">No orders yet.</td></tr>');
+          }
+
+          // Update timestamp
+          $('#lastUpdated').text('Last updated: ' + new Date().toLocaleTimeString());
+        },
+        error: function() {
+          console.warn('Sales data fetch failed — will retry in 10s.');
+        }
+      });
+    }
+
+    // Start polling after DOM is ready
+    $(document).ready(function() {
+      // Poll every 10 seconds
+      setInterval(fetchSalesData, 10000);
+    });
+  </script>
+
+</body>
+</html>

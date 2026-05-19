@@ -9,31 +9,32 @@ const flash        = require("connect-flash");
 
 const Product      = require("./models/Product");
 const User         = require("./models/User");
+const Order        = require("./models/Order");
 const { isLoggedIn, isAdmin } = require("./middleware/auth");
 require("dotenv").config();
 
 const app = express();
 
-// DB 
+// DB
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/adoreheaven";
 mongoose.connect(MONGO_URI)
-  .then(() => console.log(" MongoDB connected"))
-  .catch(err => console.error(" MongoDB error:", err));
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.error("MongoDB error:", err));
 
-//  Config 
+// Config
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Method override 
+// Method override
 app.use((req, res, next) => {
   const method = (req.query._method || "").toUpperCase();
   if (method === "PUT" || method === "DELETE") req.method = method;
   next();
 });
 
-// Sessions 
+// Sessions
 app.use(session({
   secret: process.env.SESSION_SECRET || "adoreheaven-secret-key-change-in-prod",
   resave: false,
@@ -42,45 +43,53 @@ app.use(session({
   cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
 }));
 
-//Flash
 app.use(flash());
 
-// Global locals (currentUser + flash msgs in every template) 
+// Global locals
 app.use(async (req, res, next) => {
   res.locals.currentUser = null;
+
   if (req.session.userId) {
     try {
       res.locals.currentUser = await User.findById(req.session.userId).select("-password");
     } catch (e) {}
   }
+
   res.locals.messages = {
     success: req.flash("success"),
-    error:   req.flash("error"),
-    info:    req.flash("info"),
+    error: req.flash("error"),
+    info: req.flash("info"),
   };
+
   next();
 });
 
-//  Multer 
+// Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, path.join(__dirname, "public/uploads")),
-  filename:    (req, file, cb) => {
+  filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     cb(null, Date.now() + "-" + Math.round(Math.random() * 1e6) + ext);
   },
 });
+
 const fileFilter = (req, file, cb) => {
-  ["image/jpeg","image/png","image/webp","image/gif"].includes(file.mimetype)
-    ? cb(null, true) : cb(new Error("Only image files are allowed."), false);
+  ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.mimetype)
+    ? cb(null, true)
+    : cb(new Error("Only image files are allowed."), false);
 };
-const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
 
 const uploadsDir = path.join(__dirname, "public/uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
 
-//   AUTH ROUTES
-
+// AUTH ROUTES
 
 app.get("/register", (req, res) => {
   if (req.session.userId) return res.redirect("/");
@@ -94,10 +103,12 @@ app.post("/register", async (req, res) => {
     req.flash("error", "All fields are required.");
     return res.render("register", { formData: { name, email } });
   }
+
   if (password.length < 6) {
     req.flash("error", "Password must be at least 6 characters.");
     return res.render("register", { formData: { name, email } });
   }
+
   if (password !== confirmPassword) {
     req.flash("error", "Passwords do not match.");
     return res.render("register", { formData: { name, email } });
@@ -105,13 +116,21 @@ app.post("/register", async (req, res) => {
 
   try {
     const existing = await User.findOne({ email: email.toLowerCase().trim() });
+
     if (existing) {
       req.flash("error", "An account with that email already exists.");
       return res.render("register", { formData: { name, email } });
     }
-    const user = await User.create({ name: name.trim(), email, password });
-    req.session.userId   = user._id;
+
+    const user = await User.create({
+      name: name.trim(),
+      email,
+      password,
+    });
+
+    req.session.userId = user._id;
     req.session.userRole = user.role;
+
     req.flash("success", `Welcome to Adore Heaven, ${user.name.split(" ")[0]}! 💎`);
     res.redirect("/");
   } catch (err) {
@@ -128,18 +147,23 @@ app.get("/login", (req, res) => {
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
+
   if (!email?.trim() || !password) {
     req.flash("error", "Please enter your email and password.");
     return res.render("login", { formData: { email } });
   }
+
   try {
     const user = await User.findOne({ email: email.toLowerCase().trim() });
+
     if (!user || !(await user.comparePassword(password))) {
       req.flash("error", "Invalid email or password.");
       return res.render("login", { formData: { email } });
     }
-    req.session.userId   = user._id;
+
+    req.session.userId = user._id;
     req.session.userRole = user.role;
+
     req.flash("success", `Welcome back, ${user.name.split(" ")[0]}! 💎`);
     res.redirect(user.role === "admin" ? "/admin" : "/");
   } catch (err) {
@@ -154,8 +178,7 @@ app.get("/logout", (req, res) => {
 });
 
 
-//   PUBLIC ROUTES
-
+// PUBLIC ROUTES
 
 app.get("/", (req, res) => {
   res.render("index");
@@ -164,35 +187,54 @@ app.get("/", (req, res) => {
 app.get("/products", async (req, res) => {
   try {
     const PAGE_SIZE = 8;
-    const page     = Math.max(1, parseInt(req.query.page) || 1);
-    const search   = (req.query.search   || "").trim();
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const search = (req.query.search || "").trim();
     const category = (req.query.category || "").trim();
     const minPrice = parseFloat(req.query.minPrice) || 0;
     const maxPrice = parseFloat(req.query.maxPrice) || Infinity;
-    const sort     = req.query.sort || "default";
+    const sort = req.query.sort || "default";
 
     const filter = {};
-    if (search)   filter.name     = { $regex: search, $options: "i" };
+
+    if (search) filter.name = { $regex: search, $options: "i" };
     if (category) filter.category = category;
+
     filter.price = {};
-    if (minPrice)              filter.price.$gte = minPrice;
+    if (minPrice) filter.price.$gte = minPrice;
     if (maxPrice !== Infinity) filter.price.$lte = maxPrice;
     if (!Object.keys(filter.price).length) delete filter.price;
 
     const sortMap = {
-      price_asc: {price:1}, price_desc: {price:-1}, rating: {rating:-1}, default: {_id:1}
+      price_asc: { price: 1 },
+      price_desc: { price: -1 },
+      rating: { rating: -1 },
+      default: { _id: 1 },
     };
-    const total      = await Product.countDocuments(filter);
+
+    const total = await Product.countDocuments(filter);
     const totalPages = Math.ceil(total / PAGE_SIZE);
-    const safePage   = Math.min(page, totalPages || 1);
-    const products   = await Product.find(filter)
+    const safePage = Math.min(page, totalPages || 1);
+
+    const products = await Product.find(filter)
       .sort(sortMap[sort] || sortMap.default)
-      .skip((safePage - 1) * PAGE_SIZE).limit(PAGE_SIZE);
+      .skip((safePage - 1) * PAGE_SIZE)
+      .limit(PAGE_SIZE);
+
     const categories = await Product.distinct("category");
 
     res.render("products", {
-      products, categories, currentPage: safePage, totalPages, total,
-      query: { search, category, minPrice: req.query.minPrice || "", maxPrice: req.query.maxPrice || "", sort },
+      products,
+      categories,
+      currentPage: safePage,
+      totalPages,
+      total,
+      query: {
+        search,
+        category,
+        minPrice: req.query.minPrice || "",
+        maxPrice: req.query.maxPrice || "",
+        sort,
+      },
     });
   } catch (err) {
     console.error(err);
@@ -200,43 +242,156 @@ app.get("/products", async (req, res) => {
   }
 });
 
-// Checkout — must be logged in
 app.get("/checkout", isLoggedIn, (req, res) => {
   res.send("Checkout page — coming soon!");
 });
 
 
-//   ADMIN ROUTES  (isAdmin middleware on every route)
+// SALES HELPER
 
+async function getSalesStats() {
+  const [revenueResult] = await Order.aggregate([
+    {
+      $group: {
+        _id: null,
+        totalRevenue: { $sum: "$totalAmount" },
+        totalOrders: { $sum: 1 },
+      },
+    },
+  ]);
+
+  const totalRevenue = revenueResult ? Math.round(revenueResult.totalRevenue) : 0;
+  const totalOrders = revenueResult ? revenueResult.totalOrders : 0;
+  const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+
+  const topProductResult = await Order.aggregate([
+    { $unwind: "$items" },
+    {
+      $group: {
+        _id: "$items.product",
+        count: { $sum: "$items.quantity" },
+      },
+    },
+    { $sort: { count: -1 } },
+    { $limit: 1 },
+    {
+      $lookup: {
+        from: "products",
+        localField: "_id",
+        foreignField: "_id",
+        as: "product",
+      },
+    },
+    {
+      $unwind: {
+        path: "$product",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        name: "$product.name",
+      },
+    },
+  ]);
+
+  const topProduct = topProductResult.length > 0 ? topProductResult[0].name : null;
+
+  const recentOrders = await Order.find()
+    .sort({ createdAt: -1 })
+    .limit(10)
+    .select("_id status totalAmount createdAt")
+    .lean();
+
+  return {
+    totalRevenue,
+    totalOrders,
+    avgOrderValue,
+    topProduct,
+    recentOrders,
+  };
+}
+
+
+// SALES ROUTES
+
+app.get("/sales", isAdmin, async (req, res) => {
+  try {
+    const stats = await getSalesStats();
+    res.render("sales", stats);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error loading sales dashboard.");
+  }
+});
+
+app.get("/api/sales-data", isAdmin, async (req, res) => {
+  try {
+    const stats = await getSalesStats();
+    res.json(stats);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load sales data." });
+  }
+});
+
+
+// ADMIN ROUTES
 
 app.get("/admin", isAdmin, async (req, res) => {
   try {
     const PAGE_SIZE = 15;
-    const page     = Math.max(1, parseInt(req.query.page) || 1);
-    const search   = (req.query.search   || "").trim();
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const search = (req.query.search || "").trim();
     const category = (req.query.category || "").trim();
 
     const filter = {};
-    if (search)   filter.name     = { $regex: search, $options: "i" };
+    if (search) filter.name = { $regex: search, $options: "i" };
     if (category) filter.category = category;
 
-    const total      = await Product.countDocuments(filter);
+    const total = await Product.countDocuments(filter);
     const totalPages = Math.ceil(total / PAGE_SIZE);
-    const safePage   = Math.min(page, totalPages || 1);
-    const products   = await Product.find(filter)
-      .sort({ _id: -1 }).skip((safePage - 1) * PAGE_SIZE).limit(PAGE_SIZE);
+    const safePage = Math.min(page, totalPages || 1);
+
+    const products = await Product.find(filter)
+      .sort({ _id: -1 })
+      .skip((safePage - 1) * PAGE_SIZE)
+      .limit(PAGE_SIZE);
+
     const categories = await Product.distinct("category");
-    const lowStock   = await Product.countDocuments({ stock: { $lte: 5, $gt: 0 } });
-    const onSale     = await Product.countDocuments({ prevPrice: { $ne: null, $exists: true } });
+
+    const lowStock = await Product.countDocuments({
+      stock: { $lte: 5, $gt: 0 },
+    });
+
+    const onSale = await Product.countDocuments({
+      prevPrice: { $ne: null, $exists: true },
+    });
+
+    // sales data for admin dashboard
+    const salesStats = await getSalesStats();
 
     const flashSuccess = req.flash("success");
-    const flashError   = req.flash("error");
+    const flashError = req.flash("error");
 
     res.render("admin/dashboard", {
-      products, categories, currentPage: safePage, totalPages, total,
-      lowStock, onSale, query: { search, category },
-      success: flashSuccess.length ? flashSuccess[0] : (req.query.success || null),
-      error:   flashError.length   ? flashError[0]   : (req.query.error   || null),
+      products,
+      categories,
+      currentPage: safePage,
+      totalPages,
+      total,
+      lowStock,
+      onSale,
+      query: { search, category },
+
+      success: flashSuccess.length ? flashSuccess[0] : req.query.success || null,
+      error: flashError.length ? flashError[0] : req.query.error || null,
+
+      totalRevenue: salesStats.totalRevenue,
+      totalOrders: salesStats.totalOrders,
+      avgOrderValue: salesStats.avgOrderValue,
+      topProduct: salesStats.topProduct,
+      recentOrders: salesStats.recentOrders,
     });
   } catch (err) {
     console.error(err);
@@ -246,41 +401,76 @@ app.get("/admin", isAdmin, async (req, res) => {
 
 app.get("/admin/products/new", isAdmin, async (req, res) => {
   const categories = await Product.distinct("category");
-  res.render("admin/product-form", { isEdit: false, product: {}, categories, errors: [] });
+  res.render("admin/product-form", {
+    isEdit: false,
+    product: {},
+    categories,
+    errors: [],
+  });
 });
 
 app.post("/admin/products", isAdmin, upload.single("image"), async (req, res) => {
   const categories = await Product.distinct("category");
   const { name, category, price, prevPrice, stock, rating } = req.body;
+
   const errors = [];
-  if (!name?.trim())     errors.push("Product name is required.");
+
+  if (!name?.trim()) errors.push("Product name is required.");
   if (!category?.trim()) errors.push("Category is required.");
   if (!price || isNaN(price) || Number(price) < 0) errors.push("A valid price is required.");
-  if (stock === undefined || isNaN(stock) || Number(stock) < 0) errors.push("A valid stock quantity is required.");
-  if (errors.length > 0) return res.render("admin/product-form", { isEdit: false, product: req.body, categories, errors });
+  if (stock === undefined || isNaN(stock) || Number(stock) < 0) {
+    errors.push("A valid stock quantity is required.");
+  }
+
+  if (errors.length > 0) {
+    return res.render("admin/product-form", {
+      isEdit: false,
+      product: req.body,
+      categories,
+      errors,
+    });
+  }
 
   try {
     await Product.create({
-      name: name.trim(), category: category.trim(),
+      name: name.trim(),
+      category: category.trim(),
       price: Number(price),
       prevPrice: prevPrice && !isNaN(prevPrice) ? Number(prevPrice) : null,
-      stock: Number(stock), rating: Number(rating) || 4,
+      stock: Number(stock),
+      rating: Number(rating) || 4,
       image: req.file ? "/uploads/" + req.file.filename : "",
     });
+
     req.flash("success", "Product added successfully.");
     res.redirect("/admin");
   } catch (err) {
     console.error(err);
-    res.render("admin/product-form", { isEdit: false, product: req.body, categories, errors: ["Failed to save product."] });
+    res.render("admin/product-form", {
+      isEdit: false,
+      product: req.body,
+      categories,
+      errors: ["Failed to save product."],
+    });
   }
 });
 
 app.get("/admin/products/:id/edit", isAdmin, async (req, res) => {
   try {
-    const product    = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id);
     const categories = await Product.distinct("category");
-    if (!product) { req.flash("error", "Product not found."); return res.redirect("/admin"); }
-    res.render("admin/product-form", { isEdit: true, product, categories, errors: [] });
+
+    if (!product) {
+      req.flash("error", "Product not found.");
+      return res.redirect("/admin");
+    }
+
+    res.render("admin/product-form", {
+      isEdit: true,
+      product,
+      categories,
+      errors: [],
+    });
   } catch (err) {
     req.flash("error", "Invalid product ID.");
     res.redirect("/admin");
@@ -289,24 +479,42 @@ app.get("/admin/products/:id/edit", isAdmin, async (req, res) => {
 
 app.put("/admin/products/:id", isAdmin, upload.single("image"), async (req, res) => {
   const { name, category, price, prevPrice, stock, rating } = req.body;
+
   const errors = [];
-  if (!name?.trim())     errors.push("Product name is required.");
+
+  if (!name?.trim()) errors.push("Product name is required.");
   if (!category?.trim()) errors.push("Category is required.");
   if (!price || isNaN(price) || Number(price) < 0) errors.push("A valid price is required.");
-  if (stock === undefined || isNaN(stock) || Number(stock) < 0) errors.push("A valid stock quantity is required.");
+  if (stock === undefined || isNaN(stock) || Number(stock) < 0) {
+    errors.push("A valid stock quantity is required.");
+  }
+
   if (errors.length > 0) {
     const categories = await Product.distinct("category");
-    const product    = await Product.findById(req.params.id).catch(() => req.body);
-    return res.render("admin/product-form", { isEdit: true, product, categories, errors });
+    const product = await Product.findById(req.params.id).catch(() => req.body);
+
+    return res.render("admin/product-form", {
+      isEdit: true,
+      product,
+      categories,
+      errors,
+    });
   }
+
   try {
     const update = {
-      name: name.trim(), category: category.trim(), price: Number(price),
+      name: name.trim(),
+      category: category.trim(),
+      price: Number(price),
       prevPrice: prevPrice && !isNaN(prevPrice) ? Number(prevPrice) : null,
-      stock: Number(stock), rating: Number(rating) || 4,
+      stock: Number(stock),
+      rating: Number(rating) || 4,
     };
+
     if (req.file) update.image = "/uploads/" + req.file.filename;
+
     await Product.findByIdAndUpdate(req.params.id, update, { new: true });
+
     req.flash("success", "Product updated successfully.");
     res.redirect("/admin");
   } catch (err) {
@@ -327,8 +535,16 @@ app.delete("/admin/products/:id", isAdmin, async (req, res) => {
     res.redirect("/admin");
   }
 });
-//  API Routes 
+
+
+// API ROUTES
+
 const apiRouter = require("./routes/api");
 app.use("/api/v1", apiRouter);
 
-app.listen(3000, () => console.log(" Server running on http://localhost:3000"));
+
+// SERVER
+
+app.listen(3000, () => {
+  console.log("Server running on http://localhost:3000");
+});

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel – Adore Heaven</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon"><img src="/Assests/logo.jpeg" alt=""></span>
+      <div>
+        <div class="brand-name">Adore Heaven</div>
+        <div class="brand-sub">Admin Panel</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="/admin" class="nav-item active">
+        <span class="material-symbols-outlined">dashboard</span> Dashboard
+      </a>
+
+      <a href="/sales" class="nav-item">
+        <span class="material-symbols-outlined">bar_chart</span> Sales
+      </a>
+
+      <a href="/admin/products/new" class="nav-item">
+        <span class="material-symbols-outlined">add_circle</span> Add Product
+      </a>
+
+      <a href="/products" class="nav-item" target="_blank">
+        <span class="material-symbols-outlined">storefront</span> View Store
+      </a>
+
+      <a href="/" class="nav-item" target="_blank">
+        <span class="material-symbols-outlined">home</span> Home
+      </a>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-header">
+      <h1 class="admin-title">Dashboard</h1>
+      <a href="/admin/products/new" class="btn-primary">
+        <span class="material-symbols-outlined">add</span> Add Product
+      </a>
+    </header>
+
+    <!-- Product Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-icon material-symbols-outlined">inventory_2</span>
+        <div class="stat-info">
+          <div class="stat-value"><%= total %></div>
+          <div class="stat-label">Total Products</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-icon material-symbols-outlined">category</span>
+        <div class="stat-info">
+          <div class="stat-value"><%= categories.length %></div>
+          <div class="stat-label">Categories</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-icon material-symbols-outlined">warning</span>
+        <div class="stat-info">
+          <div class="stat-value"><%= lowStock %></div>
+          <div class="stat-label">Low Stock Items</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-icon material-symbols-outlined">sell</span>
+        <div class="stat-info">
+          <div class="stat-value"><%= onSale %></div>
+          <div class="stat-label">On Sale</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sales Stats -->
+    <div class="stats-grid" style="margin-top: 20px;">
+      <div class="stat-card">
+        <span class="stat-icon material-symbols-outlined">payments</span>
+        <div class="stat-info">
+          <div class="stat-value">Rs. <%= totalRevenue.toLocaleString() %></div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-icon material-symbols-outlined">receipt_long</span>
+        <div class="stat-info">
+          <div class="stat-value"><%= totalOrders %></div>
+          <div class="stat-label">Total Orders</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-icon material-symbols-outlined">trending_up</span>
+        <div class="stat-info">
+          <div class="stat-value">Rs. <%= avgOrderValue.toLocaleString() %></div>
+          <div class="stat-label">Avg Order Value</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-icon material-symbols-outlined">emoji_events</span>
+        <div class="stat-info">
+          <div class="stat-value" style="font-size: 1rem;">
+            <%= topProduct || "N/A" %>
+          </div>
+          <div class="stat-label">Top Product</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flash messages -->
+    <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success">
+        <span class="material-symbols-outlined">check_circle</span>
+        <%= success %>
+      </div>
+    <% } %>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-error">
+        <span class="material-symbols-outlined">error</span>
+        <%= error %>
+      </div>
+    <% } %>
+
+    <!-- Filters bar -->
+    <div class="table-controls">
+      <form method="GET" action="/admin" class="search-form">
+        <input
+          type="text"
+          name="search"
+          placeholder="Search products…"
+          value="<%= query.search %>"
+          class="admin-input"
+        >
+
+        <select name="category" class="admin-select">
+          <option value="">All Categories</option>
+          <% categories.forEach(cat => { %>
+            <option value="<%= cat %>" <%= query.category === cat ? 'selected' : '' %>>
+              <%= cat %>
+            </option>
+          <% }) %>
+        </select>
+
+        <button type="submit" class="btn-secondary">Filter</button>
+        <a href="/admin" class="btn-ghost">Reset</a>
+      </form>
+    </div>
+
+    <!-- Products Table -->
+    <div class="table-wrapper">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price (PKR)</th>
+            <th>Prev Price</th>
+            <th>Stock</th>
+            <th>Rating</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% if (products.length === 0) { %>
+            <tr>
+              <td colspan="8" class="empty-row">No products found.</td>
+            </tr>
+          <% } %>
+
+          <% products.forEach(product => { %>
+            <tr>
+              <td>
+                <% if (product.image) { %>
+                  <img src="<%= product.image %>" alt="<%= product.name %>" class="table-img">
+                <% } else { %>
+                  <div class="table-img-placeholder">💎</div>
+                <% } %>
+              </td>
+
+              <td class="product-name-cell"><%= product.name %></td>
+
+              <td>
+                <span class="badge"><%= product.category %></span>
+              </td>
+
+              <td class="price-cell">
+                Rs. <%= product.price.toLocaleString() %>
+              </td>
+
+              <td class="price-muted">
+                <%= product.prevPrice ? 'Rs. ' + product.prevPrice.toLocaleString() : '—' %>
+              </td>
+
+              <td>
+                <span class="stock-badge <%= product.stock <= 5 ? 'low' : product.stock === 0 ? 'out' : '' %>">
+                  <%= product.stock %>
+                </span>
+              </td>
+
+              <td>
+                <div class="stars-mini">
+                  <% for(let i = 1; i <= 5; i++) { %>
+                    <span class="<%= i <= product.rating ? 'star-on' : 'star-off' %>">★</span>
+                  <% } %>
+                </div>
+              </td>
+
+              <td class="actions-cell">
+                <a href="/admin/products/<%= product._id %>/edit" class="btn-icon edit" title="Edit">
+                  <span class="material-symbols-outlined">edit</span>
+                </a>
+
+                <button
+                  class="btn-icon delete"
+                  title="Delete"
+                  onclick="confirmDelete('<%= product._id %>', '<%= product.name.replace(/'/g, "\\'") %>')"
+                >
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+      <nav class="pagination">
+        <a
+          href="/admin?search=<%= query.search %>&category=<%= query.category %>&page=<%= currentPage - 1 %>"
+          class="page-btn <%= currentPage === 1 ? 'disabled' : '' %>"
+        >
+          ← Prev
+        </a>
+
+        <% for (let p = 1; p <= totalPages; p++) { %>
+          <a
+            href="/admin?search=<%= query.search %>&category=<%= query.category %>&page=<%= p %>"
+            class="page-btn <%= p === currentPage ? 'active' : '' %>"
+          >
+            <%= p %>
+          </a>
+        <% } %>
+
+        <a
+          href="/admin?search=<%= query.search %>&category=<%= query.category %>&page=<%= currentPage + 1 %>"
+          class="page-btn <%= currentPage === totalPages ? 'disabled' : '' %>"
+        >
+          Next →
+        </a>
+      </nav>
+    <% } %>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="delete-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-icon">🗑️</div>
+      <h2 class="modal-title">Delete Product?</h2>
+
+      <p class="modal-msg">
+        You are about to delete
+        <strong id="modal-product-name"></strong>.
+        This action cannot be undone.
+      </p>
+
+      <div class="modal-actions">
+        <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+
+        <form id="delete-form" method="POST" style="display:inline;">
+          <input type="hidden" name="_method" value="DELETE">
+          <button type="submit" class="btn-danger">Yes, Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>
